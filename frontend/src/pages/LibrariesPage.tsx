@@ -30,9 +30,7 @@ export default function LibrariesPage({ libraries, onSave, onDelete }: Libraries
     }
   };
 
-  const handleDelete = (id: number) => {
-    setDeleteConfirm(id);
-  };
+  const handleDelete = (id: number) => setDeleteConfirm(id);
 
   const confirmDelete = async () => {
     if (deleteConfirm === null) return;
@@ -61,7 +59,7 @@ export default function LibrariesPage({ libraries, onSave, onDelete }: Libraries
       )}
 
       {modal.open && (
-        <Modal title={modal.item ? 'Edit Library' : 'Add Library'} onClose={handleClose}>
+        <Modal title={modal.item ? 'Edit Library' : 'Add Library'} onClose={handleClose} hideClose>
           <Input label="Library Name" value={form.name} onChange={v => setForm({ name: v })} placeholder="e.g. National Library" />
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
@@ -69,14 +67,16 @@ export default function LibrariesPage({ libraries, onSave, onDelete }: Libraries
           </div>
         </Modal>
       )}
+
       {deleteConfirm !== null && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)}>
+        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)} hideClose>
           <p style={{ marginBottom: '16px' }}>Are you sure you want to delete this library?</p>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <Button onClick={confirmDelete} disabled={deleting} variant="ghost">{deleting ? 'Deleting...' : 'Delete'}</Button>
+            <Button onClick={confirmDelete} disabled={deleting} variant="crimson">{deleting ? 'Deleting...' : 'Delete'}</Button>
             <Button onClick={() => setDeleteConfirm(null)} variant="ghost">Cancel</Button>
           </div>
         </Modal>
-      )}    </div>
+      )}
+    </div>
   );
 }

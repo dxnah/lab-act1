@@ -37,9 +37,7 @@ export default function BooksPage({ books, authors, libraries, onSave, onDelete 
     }
   };
 
-  const handleDelete = (id: number) => {
-    setDeleteConfirm(id);
-  };
+  const handleDelete = (id: number) => setDeleteConfirm(id);
 
   const confirmDelete = async () => {
     if (deleteConfirm === null) return;
@@ -73,7 +71,7 @@ export default function BooksPage({ books, authors, libraries, onSave, onDelete 
       )}
 
       {modal.open && (
-        <Modal title={modal.item ? 'Edit Book' : 'Add Book'} onClose={handleClose}>
+        <Modal title={modal.item ? 'Edit Book' : 'Add Book'} onClose={handleClose} hideClose>
           <Input label="Title" value={form.title} onChange={v => setForm({ ...form, title: v })} placeholder="e.g. Noli Me Tángere" />
           <Select
             label="Author"
@@ -95,10 +93,10 @@ export default function BooksPage({ books, authors, libraries, onSave, onDelete 
       )}
 
       {deleteConfirm !== null && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)}>
+        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)} hideClose>
           <p style={{ marginBottom: '16px' }}>Are you sure you want to delete this book?</p>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <Button onClick={confirmDelete} disabled={deleting} variant="ghost">{deleting ? 'Deleting...' : 'Delete'}</Button>
+            <Button onClick={confirmDelete} disabled={deleting} variant="crimson">{deleting ? 'Deleting...' : 'Delete'}</Button>
             <Button onClick={() => setDeleteConfirm(null)} variant="ghost">Cancel</Button>
           </div>
         </Modal>

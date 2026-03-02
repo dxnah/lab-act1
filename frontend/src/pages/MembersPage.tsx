@@ -30,9 +30,7 @@ export default function MembersPage({ members, onSave, onDelete }: MembersPagePr
     }
   };
 
-  const handleDelete = (id: number) => {
-    setDeleteConfirm(id);
-  };
+  const handleDelete = (id: number) => setDeleteConfirm(id);
 
   const confirmDelete = async () => {
     if (deleteConfirm === null) return;
@@ -61,7 +59,7 @@ export default function MembersPage({ members, onSave, onDelete }: MembersPagePr
       )}
 
       {modal.open && (
-        <Modal title={modal.item ? 'Edit Member' : 'Add Member'} onClose={handleClose}>
+        <Modal title={modal.item ? 'Edit Member' : 'Add Member'} onClose={handleClose} hideClose>
           <Input label="Full Name" value={form.fullname} onChange={v => setForm({ fullname: v })} placeholder="e.g. Juan dela Cruz" />
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
@@ -69,14 +67,16 @@ export default function MembersPage({ members, onSave, onDelete }: MembersPagePr
           </div>
         </Modal>
       )}
+
       {deleteConfirm !== null && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)}>
+        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)} hideClose>
           <p style={{ marginBottom: '16px' }}>Are you sure you want to delete this member?</p>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <Button onClick={confirmDelete} disabled={deleting} variant="ghost">{deleting ? 'Deleting...' : 'Delete'}</Button>
+            <Button onClick={confirmDelete} disabled={deleting} variant="crimson">{deleting ? 'Deleting...' : 'Delete'}</Button>
             <Button onClick={() => setDeleteConfirm(null)} variant="ghost">Cancel</Button>
           </div>
         </Modal>
-      )}    </div>
+      )}
+    </div>
   );
 }

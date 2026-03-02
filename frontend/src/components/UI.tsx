@@ -122,16 +122,19 @@ interface ModalProps {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
+  hideClose?: boolean;
 }
 
-export function Modal({ title, onClose, children }: ModalProps) {
+export function Modal({ title, onClose, children, hideClose = false }: ModalProps) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,5,2,0.8)', backdropFilter: 'blur(4px)' }}>
       <div style={{ background: COLORS.surfaceHover, border: `1px solid ${COLORS.gold}`, borderRadius: '16px', width: '100%', maxWidth: '480px', margin: '0 16px', overflow: 'hidden', boxShadow: `0 25px 60px rgba(0,0,0,0.7)` }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', background: COLORS.surface, borderBottom: `1px solid ${COLORS.gold}` }}>
           <h2 style={{ color: COLORS.gold, fontFamily: FONTS.display, fontSize: '18px', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>{title}</h2>
-          <button onClick={onClose} style={{ color: COLORS.gold, background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', lineHeight: 1, opacity: 0.8 }}>×</button>
+          {!hideClose && (
+            <button onClick={onClose} style={{ color: COLORS.gold, background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', lineHeight: 1, opacity: 0.8 }}>×</button>
+          )}
         </div>
         {/* Body */}
         <div style={{ padding: '24px', color: COLORS.parchment, fontFamily: FONTS.body }}>{children}</div>

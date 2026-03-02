@@ -30,9 +30,7 @@ export default function AuthorsPage({ authors, onSave, onDelete }: AuthorsPagePr
     }
   };
 
-  const handleDelete = (id: number) => {
-    setDeleteConfirm(id);
-  };
+  const handleDelete = (id: number) => setDeleteConfirm(id);
 
   const confirmDelete = async () => {
     if (deleteConfirm === null) return;
@@ -61,8 +59,8 @@ export default function AuthorsPage({ authors, onSave, onDelete }: AuthorsPagePr
       )}
 
       {modal.open && (
-        <Modal title={modal.item ? 'Edit Author' : 'Add Author'} onClose={handleClose}>
-          <Input label="Full Name" value={form.fullname} onChange={v => setForm({ fullname: v })} placeholder="e.g. José Rizal" />
+        <Modal title={modal.item ? 'Edit Author' : 'Add Author'} onClose={handleClose} hideClose>
+          <Input label="Full Name" value={form.fullname} onChange={v => setForm({ fullname: v })} placeholder="e.g. Jonah Pacala" />
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
             <Button onClick={handleClose} variant="ghost">Cancel</Button>
@@ -71,10 +69,10 @@ export default function AuthorsPage({ authors, onSave, onDelete }: AuthorsPagePr
       )}
 
       {deleteConfirm !== null && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)}>
+        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)} hideClose>
           <p style={{ marginBottom: '16px' }}>Are you sure you want to delete this author?</p>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <Button onClick={confirmDelete} disabled={deleting} variant="ghost">{deleting ? 'Deleting...' : 'Delete'}</Button>
+            <Button onClick={confirmDelete} disabled={deleting} variant="crimson">{deleting ? 'Deleting...' : 'Delete'}</Button>
             <Button onClick={() => setDeleteConfirm(null)} variant="ghost">Cancel</Button>
           </div>
         </Modal>
