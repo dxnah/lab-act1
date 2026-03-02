@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #110a06;
+  font-family: 'Crimson Text', Georgia, serif;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #110a06; }
+::-webkit-scrollbar-thumb { background: #5c3d2a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #c9a84c; }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6) sepia(1) saturate(3) hue-rotate(5deg);
+  cursor: pointer;
+}
