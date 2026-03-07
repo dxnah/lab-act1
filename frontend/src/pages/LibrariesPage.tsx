@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import { Library } from '../types';
-import { Button, Input, Modal, Table, PageHeader, EmptyState } from '../components/UI';
+import { ICONS } from '../utils/icons';
+import { Button, Input, Modal, Table, PageHeader, EmptyState, ConfirmDelete } from '../components/UI';
 
 interface LibrariesPageProps {
   libraries: Library[];
@@ -10,10 +11,9 @@ interface LibrariesPageProps {
 
 export default function LibrariesPage({ libraries, onSave, onDelete }: LibrariesPageProps) {
   const [modal, setModal] = useState<{ open: boolean; item?: Library }>({ open: false });
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Library | null>(null);
   const [form, setForm] = useState({ name: '' });
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   const openCreate = () => { setForm({ name: '' }); setModal({ open: true }); };
   const openEdit = (item: Library) => { setForm({ name: item.name }); setModal({ open: true, item }); };
@@ -22,44 +22,35 @@ export default function LibrariesPage({ libraries, onSave, onDelete }: Libraries
   const handleSave = async () => {
     if (!form.name.trim()) return;
     setSaving(true);
-    try {
-      await onSave(form, modal.item?.id);
-      handleClose();
-    } finally {
-      setSaving(false);
-    }
+    try { await onSave(form, modal.item?.id); handleClose(); } finally { setSaving(false); }
   };
 
-  const handleDelete = (id: number) => setDeleteConfirm(id);
-
-  const confirmDelete = async () => {
-    if (deleteConfirm === null) return;
-    setDeleting(true);
-    try {
-      await onDelete(deleteConfirm);
-      setDeleteConfirm(null);
-    } finally {
-      setDeleting(false);
-    }
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await onDelete(deleteTarget.id);
+    setDeleteTarget(null);
   };
 
-  const columns = [
-    { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Library Name' },
-  ];
+  useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    if (modal.open) handleSave();
+    if (deleteTarget) handleDeleteConfirm();
+  };
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [modal.open, deleteTarget, form]);
+
+  const columns = [{ key: 'id', label: 'ID' }, { key: 'name', label: 'Library Name' }];
 
   return (
     <div>
-      <PageHeader icon="🏛️" title="Libraries" count={libraries.length} onAdd={openCreate} />
-
-      {libraries.length === 0 ? (
-        <EmptyState message="No libraries yet. Add your first library!" />
-      ) : (
-        <Table columns={columns} data={libraries} onEdit={openEdit} onDelete={handleDelete} />
+      <PageHeader icon={ICONS.libraries()} title="Libraries" count={libraries.length} onAdd={openCreate} />
+      {libraries.length === 0 ? <EmptyState message="No libraries yet." /> : (
+        <Table columns={columns} data={libraries} onEdit={openEdit} onDelete={(id) => setDeleteTarget(libraries.find(l => l.id === id) || null)} />
       )}
-
       {modal.open && (
-        <Modal title={modal.item ? 'Edit Library' : 'Add Library'} onClose={handleClose} hideClose>
+        <Modal title={modal.item ? 'Edit Library' : 'Add Library'} onClose={handleClose}>
           <Input label="Library Name" value={form.name} onChange={v => setForm({ name: v })} placeholder="e.g. National Library" />
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
@@ -67,16 +58,7 @@ export default function LibrariesPage({ libraries, onSave, onDelete }: Libraries
           </div>
         </Modal>
       )}
-
-      {deleteConfirm !== null && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)} hideClose>
-          <p style={{ marginBottom: '16px' }}>Are you sure you want to delete this library?</p>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Button onClick={confirmDelete} disabled={deleting} variant="crimson">{deleting ? 'Deleting...' : 'Delete'}</Button>
-            <Button onClick={() => setDeleteConfirm(null)} variant="ghost">Cancel</Button>
-          </div>
-        </Modal>
-      )}
+      {deleteTarget && <ConfirmDelete itemName={deleteTarget.name} onConfirm={handleDeleteConfirm} onCancel={() => setDeleteTarget(null)} />}
     </div>
   );
 }

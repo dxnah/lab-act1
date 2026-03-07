@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import { Member } from '../types';
-import { Button, Input, Modal, Table, PageHeader, EmptyState } from '../components/UI';
+import { ICONS } from '../utils/icons';
+import { Button, Input, Modal, Table, PageHeader, EmptyState, ConfirmDelete } from '../components/UI';
 
 interface MembersPageProps {
   members: Member[];
@@ -10,10 +11,9 @@ interface MembersPageProps {
 
 export default function MembersPage({ members, onSave, onDelete }: MembersPageProps) {
   const [modal, setModal] = useState<{ open: boolean; item?: Member }>({ open: false });
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
   const [form, setForm] = useState({ fullname: '' });
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   const openCreate = () => { setForm({ fullname: '' }); setModal({ open: true }); };
   const openEdit = (item: Member) => { setForm({ fullname: item.fullname }); setModal({ open: true, item }); };
@@ -22,44 +22,35 @@ export default function MembersPage({ members, onSave, onDelete }: MembersPagePr
   const handleSave = async () => {
     if (!form.fullname.trim()) return;
     setSaving(true);
-    try {
-      await onSave(form, modal.item?.id);
-      handleClose();
-    } finally {
-      setSaving(false);
-    }
+    try { await onSave(form, modal.item?.id); handleClose(); } finally { setSaving(false); }
   };
 
-  const handleDelete = (id: number) => setDeleteConfirm(id);
-
-  const confirmDelete = async () => {
-    if (deleteConfirm === null) return;
-    setDeleting(true);
-    try {
-      await onDelete(deleteConfirm);
-      setDeleteConfirm(null);
-    } finally {
-      setDeleting(false);
-    }
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await onDelete(deleteTarget.id);
+    setDeleteTarget(null);
   };
 
-  const columns = [
-    { key: 'id', label: 'ID' },
-    { key: 'fullname', label: 'Full Name' },
-  ];
+  useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    if (modal.open) handleSave();
+    if (deleteTarget) handleDeleteConfirm();
+  };
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [modal.open, deleteTarget, form]);
+
+  const columns = [{ key: 'id', label: 'ID' }, { key: 'fullname', label: 'Full Name' }];
 
   return (
     <div>
-      <PageHeader icon="👤" title="Members" count={members.length} onAdd={openCreate} />
-
-      {members.length === 0 ? (
-        <EmptyState message="No members yet. Add your first member!" />
-      ) : (
-        <Table columns={columns} data={members} onEdit={openEdit} onDelete={handleDelete} />
+      <PageHeader icon={ICONS.members()} title="Members" count={members.length} onAdd={openCreate} />
+      {members.length === 0 ? <EmptyState message="No members yet." /> : (
+        <Table columns={columns} data={members} onEdit={openEdit} onDelete={(id) => setDeleteTarget(members.find(m => m.id === id) || null)} />
       )}
-
       {modal.open && (
-        <Modal title={modal.item ? 'Edit Member' : 'Add Member'} onClose={handleClose} hideClose>
+        <Modal title={modal.item ? 'Edit Member' : 'Add Member'} onClose={handleClose}>
           <Input label="Full Name" value={form.fullname} onChange={v => setForm({ fullname: v })} placeholder="e.g. Juan dela Cruz" />
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
@@ -67,16 +58,7 @@ export default function MembersPage({ members, onSave, onDelete }: MembersPagePr
           </div>
         </Modal>
       )}
-
-      {deleteConfirm !== null && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)} hideClose>
-          <p style={{ marginBottom: '16px' }}>Are you sure you want to delete this member?</p>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Button onClick={confirmDelete} disabled={deleting} variant="crimson">{deleting ? 'Deleting...' : 'Delete'}</Button>
-            <Button onClick={() => setDeleteConfirm(null)} variant="ghost">Cancel</Button>
-          </div>
-        </Modal>
-      )}
+      {deleteTarget && <ConfirmDelete itemName={deleteTarget.fullname} onConfirm={handleDeleteConfirm} onCancel={() => setDeleteTarget(null)} />}
     </div>
   );
 }

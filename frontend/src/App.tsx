@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Tab } from './types';
 import { useLibraryData } from './hooks/useLibraryData';
-import { COLORS, FONTS } from './utils/theme';
+import { COLORS } from './utils/theme';
 import Navbar from './components/NavBar';
 import AuthorsPage from './pages/AuthorsPage';
 import LibrariesPage from './pages/LibrariesPage';

@@ -1,9 +1,18 @@
 import axios from 'axios';
 
+const baseURL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api/v1/';
+
 const API = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/v1/',
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
 });
+
+API.interceptors.response.use(
+  response => response,
+  error => {
+    throw new Error('Network error – check your connection / server status');
+  }
+);
 
 // Authors
 export const getAuthors = () => API.get('authors/');

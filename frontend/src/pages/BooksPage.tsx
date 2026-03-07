@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import { Book, Author, Library } from '../types';
-import { Button, Input, Select, Modal, Table, PageHeader, EmptyState } from '../components/UI';
+import { ICONS } from '../utils/icons';
+import { Button, Input, Select, Modal, Table, PageHeader, EmptyState, ConfirmDelete } from '../components/UI';
 
 interface BooksPageProps {
   books: Book[];
@@ -14,10 +15,9 @@ const EMPTY_FORM = { title: '', author: '', library: '' };
 
 export default function BooksPage({ books, authors, libraries, onSave, onDelete }: BooksPageProps) {
   const [modal, setModal] = useState<{ open: boolean; item?: Book }>({ open: false });
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Book | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   const openCreate = () => { setForm(EMPTY_FORM); setModal({ open: true }); };
   const openEdit = (item: Book) => {
@@ -37,18 +37,21 @@ export default function BooksPage({ books, authors, libraries, onSave, onDelete 
     }
   };
 
-  const handleDelete = (id: number) => setDeleteConfirm(id);
-
-  const confirmDelete = async () => {
-    if (deleteConfirm === null) return;
-    setDeleting(true);
-    try {
-      await onDelete(deleteConfirm);
-      setDeleteConfirm(null);
-    } finally {
-      setDeleting(false);
-    }
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await onDelete(deleteTarget.id);
+    setDeleteTarget(null);
   };
+
+  useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    if (modal.open) handleSave();
+    if (deleteTarget) handleDeleteConfirm();
+  };
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [modal.open, deleteTarget, form]);
 
   const getAuthorName = (id: number) => authors.find(a => a.id === id)?.fullname || `Author #${id}`;
   const getLibraryName = (id: number) => libraries.find(l => l.id === id)?.name || `Library #${id}`;
@@ -62,29 +65,21 @@ export default function BooksPage({ books, authors, libraries, onSave, onDelete 
 
   return (
     <div>
-      <PageHeader icon="📖" title="Books" count={books.length} onAdd={openCreate} />
+      <PageHeader icon={ICONS.books()} title="Books" count={books.length} onAdd={openCreate} />
 
       {books.length === 0 ? (
         <EmptyState message="No books yet. Add your first book!" />
       ) : (
-        <Table columns={columns} data={books} onEdit={openEdit} onDelete={handleDelete} />
+        <Table columns={columns} data={books} onEdit={openEdit} onDelete={(id) => setDeleteTarget(books.find(b => b.id === id) || null)} />
       )}
 
       {modal.open && (
-        <Modal title={modal.item ? 'Edit Book' : 'Add Book'} onClose={handleClose} hideClose>
+        <Modal title={modal.item ? 'Edit Book' : 'Add Book'} onClose={handleClose}>
           <Input label="Title" value={form.title} onChange={v => setForm({ ...form, title: v })} placeholder="e.g. Noli Me Tángere" />
-          <Select
-            label="Author"
-            value={form.author}
-            onChange={v => setForm({ ...form, author: v })}
-            options={authors.map(a => ({ value: String(a.id), label: a.fullname }))}
-          />
-          <Select
-            label="Library"
-            value={form.library}
-            onChange={v => setForm({ ...form, library: v })}
-            options={libraries.map(l => ({ value: String(l.id), label: l.name }))}
-          />
+          <Select label="Author" value={form.author} onChange={v => setForm({ ...form, author: v })}
+            options={authors.map(a => ({ value: String(a.id), label: a.fullname }))} />
+          <Select label="Library" value={form.library} onChange={v => setForm({ ...form, library: v })}
+            options={libraries.map(l => ({ value: String(l.id), label: l.name }))} />
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
             <Button onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
             <Button onClick={handleClose} variant="ghost">Cancel</Button>
@@ -92,15 +87,8 @@ export default function BooksPage({ books, authors, libraries, onSave, onDelete 
         </Modal>
       )}
 
-      {deleteConfirm !== null && (
-        <Modal title="Confirm Delete" onClose={() => setDeleteConfirm(null)} hideClose>
-          <p style={{ marginBottom: '16px' }}>Are you sure you want to delete this book?</p>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Button onClick={confirmDelete} disabled={deleting} variant="crimson">{deleting ? 'Deleting...' : 'Delete'}</Button>
-            <Button onClick={() => setDeleteConfirm(null)} variant="ghost">Cancel</Button>
-          </div>
-        </Modal>
-      )}
+      {deleteTarget && (
+        <ConfirmDelete itemName={deleteTarget.title} onConfirm={handleDeleteConfirm} onCancel={() => setDeleteTarget(null)} />)}
     </div>
   );
 }

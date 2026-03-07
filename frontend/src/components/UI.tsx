@@ -1,7 +1,7 @@
 import React from 'react';
 import { COLORS, FONTS } from '../utils/theme';
 
-// ─── Button ────────────────────────────────────────────────────────────────
+//  Button 
 type ButtonVariant = 'gold' | 'crimson' | 'slate' | 'ghost';
 
 const BUTTON_STYLES: Record<ButtonVariant, { bg: string; hover: string; text: string }> = {
@@ -29,29 +29,20 @@ export function Button({ onClick, variant = 'gold', size = 'md', disabled, child
       onClick={onClick}
       disabled={disabled}
       style={{
-        background: s.bg,
-        color: s.text,
-        padding,
-        fontSize,
+        background: s.bg, color: s.text, padding, fontSize,
         fontFamily: FONTS.body,
         border: variant === 'ghost' ? `1px solid ${COLORS.borderLight}` : 'none',
-        borderRadius: '8px',
-        fontWeight: 700,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.6 : 1,
-        transition: 'all 0.15s ease',
-      }}
+        borderRadius: '8px', fontWeight: 700, letterSpacing: '0.08em',
+        textTransform: 'uppercase', cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.6 : 1, transition: 'all 0.15s ease',}}
       onMouseEnter={e => !disabled && ((e.target as HTMLElement).style.background = s.hover)}
-      onMouseLeave={e => !disabled && ((e.target as HTMLElement).style.background = s.bg)}
-    >
+      onMouseLeave={e => !disabled && ((e.target as HTMLElement).style.background = s.bg)}>
       {children}
     </button>
   );
 }
 
-// ─── Input ─────────────────────────────────────────────────────────────────
+//  Input 
 interface InputProps {
   label: string;
   value: string;
@@ -67,25 +58,21 @@ export function Input({ label, value, onChange, type = 'text', placeholder }: In
         {label}
       </label>
       <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
+        type={type} value={value} placeholder={placeholder}
         onChange={e => onChange(e.target.value)}
         style={{
           width: '100%', padding: '10px 14px',
           background: COLORS.bg, color: COLORS.parchment,
           border: `1px solid ${COLORS.borderLight}`, borderRadius: '8px',
           fontFamily: FONTS.body, fontSize: '15px', outline: 'none',
-          transition: 'border-color 0.15s',
-        }}
+          transition: 'border-color 0.15s',}}
         onFocus={e => (e.target.style.borderColor = COLORS.gold)}
-        onBlur={e => (e.target.style.borderColor = COLORS.borderLight)}
-      />
+        onBlur={e => (e.target.style.borderColor = COLORS.borderLight)}/>
     </div>
   );
 }
 
-// ─── Select ────────────────────────────────────────────────────────────────
+//  Select 
 interface SelectProps {
   label: string;
   value: string;
@@ -100,16 +87,12 @@ export function Select({ label, value, onChange, options }: SelectProps) {
         {label}
       </label>
       <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
+        value={value} onChange={e => onChange(e.target.value)}
         style={{
           width: '100%', padding: '10px 14px',
           background: COLORS.bg, color: COLORS.parchment,
           border: `1px solid ${COLORS.borderLight}`, borderRadius: '8px',
-          fontFamily: FONTS.body, fontSize: '15px', outline: 'none',
-          cursor: 'pointer',
-        }}
-      >
+          fontFamily: FONTS.body, fontSize: '15px', outline: 'none', cursor: 'pointer',}}>
         <option value="">Select...</option>
         {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
@@ -117,7 +100,7 @@ export function Select({ label, value, onChange, options }: SelectProps) {
   );
 }
 
-// ─── Modal ─────────────────────────────────────────────────────────────────
+//  Modal 
 interface ModalProps {
   title: string;
   onClose: () => void;
@@ -125,19 +108,48 @@ interface ModalProps {
   hideClose?: boolean;
 }
 
-export function Modal({ title, onClose, children, hideClose = false }: ModalProps) {
+export function Modal({ title, onClose, children, hideClose = true }: ModalProps) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,5,2,0.8)', backdropFilter: 'blur(4px)' }}>
-      <div style={{ background: COLORS.surfaceHover, border: `1px solid ${COLORS.gold}`, borderRadius: '16px', width: '100%', maxWidth: '480px', margin: '0 16px', overflow: 'hidden', boxShadow: `0 25px 60px rgba(0,0,0,0.7)` }}>
-        {/* Header */}
+      <div style={{ background: COLORS.surfaceHover, border: `1px solid ${COLORS.gold}`, borderRadius: '16px', width: '100%', maxWidth: '480px', margin: '0 16px', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.7)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', background: COLORS.surface, borderBottom: `1px solid ${COLORS.gold}` }}>
           <h2 style={{ color: COLORS.gold, fontFamily: FONTS.display, fontSize: '18px', fontWeight: 600, letterSpacing: '0.05em', margin: 0 }}>{title}</h2>
           {!hideClose && (
-            <button onClick={onClose} style={{ color: COLORS.gold, background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', lineHeight: 1, opacity: 0.8 }}>×</button>
-          )}
+            <button onClick={onClose} style={{ color: COLORS.gold, background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', lineHeight: 1, opacity: 0.8 }}>×</button>)}
         </div>
-        {/* Body */}
         <div style={{ padding: '24px', color: COLORS.parchment, fontFamily: FONTS.body }}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+//  Confirm Delete Modal 
+interface ConfirmDeleteProps {
+  itemName?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export function ConfirmDelete({ itemName = 'this record', onConfirm, onCancel }: ConfirmDeleteProps) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,5,2,0.85)', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: COLORS.surfaceHover, border: `1px solid ${COLORS.crimson}`, borderRadius: '16px', width: '100%', maxWidth: '400px', margin: '0 16px', overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.8)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px', background: COLORS.surface, borderBottom: `1px solid ${COLORS.crimson}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h2 style={{ color: COLORS.crimson, fontFamily: FONTS.display, fontSize: '18px', fontWeight: 600, margin: 0 }}>Confirm Delete</h2>
+          </div>
+        </div>
+        <div style={{ padding: '28px 24px' }}>
+          <p style={{ color: COLORS.parchment, fontFamily: FONTS.body, fontSize: '16px', margin: '0 0 24px', lineHeight: 1.6 }}>
+            Are you sure you want to delete{' '}
+            <span style={{ color: COLORS.gold, fontWeight: 600 }}>"{itemName}"</span>?{' '}
+            <span style={{ color: COLORS.crimsonHover }}> This action cannot be undone.</span>
+          </p>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Button onClick={onConfirm} variant="crimson">Delete</Button>
+            <Button onClick={onCancel} variant="ghost">Cancel</Button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -174,7 +186,7 @@ export function Spinner() {
 
 // ─── Page Header ───────────────────────────────────────────────────────────
 interface PageHeaderProps {
-  icon: string;
+  icon: React.ReactNode | (() => React.ReactNode);
   title: string;
   count: number;
   onAdd: () => void;
@@ -182,16 +194,30 @@ interface PageHeaderProps {
 
 export function PageHeader({ icon, title, count, onAdd }: PageHeaderProps) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-      <div>
-        <h1 style={{ color: COLORS.parchment, fontFamily: FONTS.display, fontSize: '26px', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span>{icon}</span> {title}
-        </h1>
-        <p style={{ color: COLORS.textMuted, fontSize: '13px', fontFamily: FONTS.body, margin: '4px 0 0', letterSpacing: '0.05em' }}>
-          {count} record{count !== 1 ? 's' : ''}
-        </p>
+    <div style={{ marginBottom: '28px' }}>
+      {/* Decorative top border */}
+      <div style={{ height: '2px', background: `linear-gradient(to right, ${COLORS.gold})`, marginBottom: '20px', borderRadius: '2px' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          {/* Icon box */}
+          <div style={{
+            width: '48px', height: '48px', borderRadius: '10px',
+            background: `rgba(201,168,76,0.12)`, border: `1px solid ${COLORS.gold}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px',}}>
+          {typeof icon === 'function' ? icon() : icon}
+          </div>
+
+          <div>
+            <h1 style={{ color: COLORS.gold, fontFamily: FONTS.display, fontSize: '26px', fontWeight: 700, margin: 0, letterSpacing: '0.04em' }}>
+              {title}
+            </h1>
+            <p style={{ color: COLORS.textMuted, fontSize: '12px', fontFamily: FONTS.body, margin: '2px 0 0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {count} record{count !== 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+        <Button onClick={onAdd} variant="gold">+ Add New</Button>
       </div>
-      <Button onClick={onAdd} variant="gold">+ Add New</Button>
     </div>
   );
 }
